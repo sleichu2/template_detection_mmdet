@@ -6,6 +6,7 @@ The codes are based on mmdetection. If you have never used the mmdetection frame
 ## Template Detector
 
 The detector takes two images as inputs: template image and fact image. You can see the [detector code](mmdet/models/detectors/template_detector.py) for details.
+Load config file: [template_detector_r50.py](template_detector_r50.py)
 
 Other implementation of the detector is similar to other mmdetection detectors.
 
@@ -25,3 +26,19 @@ Other implementation of the detector is similar to other mmdetection detectors.
 ## Data
 
 Write your dataset file like [COCO](mmdet/datasets/coco.py) and [CustomDataset](mmdet/datasets/custom.py) classes in [TemplateDataset](mmdet/datasets/template_dataset.py) file.
+
+### Annotations
+
+```
+[
+    {
+        'template_img': 'a.jpg',
+        'fact_img': 'b.jpg',
+        'width': 1280,
+        'height': 720,
+        'bboxes': <list> [[x1, y1, w, h], ...]
+        'labels': <list> [1, ...]
+    },
+    ...
+]
+```

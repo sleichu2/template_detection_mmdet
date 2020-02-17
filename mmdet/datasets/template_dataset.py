@@ -11,14 +11,12 @@ class TemplateDataset(CustomDataset):
 
     Annotation format:
     [
-        {   
+        {
             'template_img': 'a.jpg',
             'fact_img': 'b.jpg',
-            'template_width': 1280,
-            'template_height': 720,
-            'fact_width': 1280,
-            'fact_height': 720,
-            'bboxes': <list> [[x1, y1, x2, y2], ...]
+            'width': 1280,
+            'height': 720,
+            'bboxes': <list> [[x1, y1, w, h], ...]
             'labels': <list> [1, ...]
         },
         ...
@@ -40,7 +38,26 @@ class TemplateDataset(CustomDataset):
         return valid_inds
 
     def _set_group_flag(self):
-        """You can delete this method if you annotate the 
+        """You can delete this method if you annotate the
         height and width of images, then use the superclass method
         """
         self.flag = np.zeros(len(self), dtype=np.uint8)
+
+    def prepare_train_img(self, idx):
+        img_info = self.img_infos[idx]
+        ann_info = {}
+        ann_info['bboxes'] = img_info.pop('bboxes')
+        ann_info['labels'] = img_info.pop('labels')
+        results = dict(img_info=img_info, ann_info=ann_info)
+        if self.proposals is not None:
+            results['proposals'] = self.proposals[idx]
+        self.pre_pipeline(results)
+        return self.pipeline(results)
+
+    def prepare_test_img(self, idx):
+        img_info = self.img_infos[idx]
+        results = dict(img_info=img_info)
+        if self.proposals is not None:
+            results['proposals'] = self.proposals[idx]
+        self.pre_pipeline(results)
+        return self.pipeline(results)
