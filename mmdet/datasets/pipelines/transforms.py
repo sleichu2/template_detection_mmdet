@@ -119,23 +119,24 @@ class Resize(object):
 
     def _resize_img(self, results):
         if self.keep_ratio:
-            img, scale_factor = mmcv.imrescale(
-                results['img'], results['scale'], return_scale=True)
+            fact_img, _ = mmcv.imrescale(results['fact_img'], results['scale'], return_scale=True)
+            template_img, scale_factor = mmcv.imrescale(results['template_img'], results['scale'], return_scale=True)
         else:
-            img, w_scale, h_scale = mmcv.imresize(
-                results['img'], results['scale'], return_scale=True)
-            scale_factor = np.array([w_scale, h_scale, w_scale, h_scale],
-                                    dtype=np.float32)
-        results['img'] = img
-        results['img_shape'] = img.shape
-        results['pad_shape'] = img.shape  # in case that there is no padding
+            fact_img, _, _ = mmcv.imresize(results['fact_img'], results['scale'], return_scale=True)
+            template_img, w_scale, h_scale = mmcv.imresize(results['template_img'], results['scale'], return_scale=True)
+            scale_factor = np.array([w_scale, h_scale, w_scale, h_scale],dtype=np.float32)
+
+        results['fact_img'] = fact_img
+        results['template_img'] = template_img
+        results['img_shape'] = fact_img.shape
+        results['pad_shape'] = fact_img.shape  # in case that there is no padding
         results['scale_factor'] = scale_factor
         results['keep_ratio'] = self.keep_ratio
 
     def _resize_bboxes(self, results):
         img_shape = results['img_shape']
         for key in results.get('bbox_fields', []):
-            bboxes = results[key] * results['scale_factor']
+            bboxes = np.array(results[key]) * results['scale_factor']
             bboxes[:, 0::2] = np.clip(bboxes[:, 0::2], 0, img_shape[1] - 1)
             bboxes[:, 1::2] = np.clip(bboxes[:, 1::2], 0, img_shape[0] - 1)
             results[key] = bboxes
@@ -236,8 +237,8 @@ class RandomFlip(object):
             results['flip_direction'] = self.direction
         if results['flip']:
             # flip image
-            results['img'] = mmcv.imflip(
-                results['img'], direction=results['flip_direction'])
+            results['fact_img'] = mmcv.imflip(results['fact_img'], direction=results['flip_direction'])
+            results['template_img'] = mmcv.imflip(results['template_img'], direction=results['flip_direction'])
             # flip bboxes
             for key in results.get('bbox_fields', []):
                 results[key] = self.bbox_flip(results[key],
@@ -284,12 +285,16 @@ class Pad(object):
 
     def _pad_img(self, results):
         if self.size is not None:
-            padded_img = mmcv.impad(results['img'], self.size)
+            fact_img = mmcv.impad(results['fact_img'], self.size)
+            template_img = mmcv.impad(results['template_img'], self.size)
         elif self.size_divisor is not None:
-            padded_img = mmcv.impad_to_multiple(
-                results['img'], self.size_divisor, pad_val=self.pad_val)
-        results['img'] = padded_img
-        results['pad_shape'] = padded_img.shape
+            fact_img = mmcv.impad_to_multiple(results['fact_img'], self.size_divisor, pad_val=self.pad_val)
+            template_img = mmcv.impad_to_multiple(results['template_img'], self.size_divisor, pad_val=self.pad_val)
+        else:
+            raise Exception("pad, bt i do not know why~")
+        results['fact_img'] = fact_img
+        results['template_img'] = template_img
+        results['pad_shape'] = fact_img.shape
         results['pad_fixed_size'] = self.size
         results['pad_size_divisor'] = self.size_divisor
 
@@ -339,7 +344,9 @@ class Normalize(object):
         self.to_rgb = to_rgb
 
     def __call__(self, results):
-        results['img'] = mmcv.imnormalize(results['img'], self.mean, self.std,
+        results['fact_img'] = mmcv.imnormalize(results['fact_img'], self.mean, self.std,
+                                          self.to_rgb)
+        results['template_img'] = mmcv.imnormalize(results['template_img'], self.mean, self.std,
                                           self.to_rgb)
         results['img_norm_cfg'] = dict(
             mean=self.mean, std=self.std, to_rgb=self.to_rgb)

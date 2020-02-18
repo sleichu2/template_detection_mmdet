@@ -70,8 +70,8 @@ def bbox_overlaps(bboxes1, bboxes2, mode='iou', is_aligned=False):
         else:
             ious = overlap / area1
     else:
-        lt = torch.max(bboxes1[:, None, :2], bboxes2[:, :2])  # [rows, cols, 2]
-        rb = torch.min(bboxes1[:, None, 2:], bboxes2[:, 2:])  # [rows, cols, 2]
+        lt = torch.max(bboxes1[:, None, :2].double(), bboxes2[:, :2].double())  # [rows, cols, 2]
+        rb = torch.min(bboxes1[:, None, 2:].double(), bboxes2[:, 2:].double())  # [rows, cols, 2]
 
         wh = (rb - lt + 1).clamp(min=0)  # [rows, cols, 2]
         overlap = wh[:, :, 0] * wh[:, :, 1]
@@ -81,8 +81,8 @@ def bbox_overlaps(bboxes1, bboxes2, mode='iou', is_aligned=False):
         if mode == 'iou':
             area2 = (bboxes2[:, 2] - bboxes2[:, 0] + 1) * (
                 bboxes2[:, 3] - bboxes2[:, 1] + 1)
-            ious = overlap / (area1[:, None] + area2 - overlap)
+            ious = overlap / (area1[:, None].double() + area2.double() - overlap)
         else:
-            ious = overlap / (area1[:, None])
+            ious = overlap / (area1[:, None].double())
 
     return ious

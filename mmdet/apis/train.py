@@ -76,7 +76,7 @@ def batch_processor(model, data, train_mode):
     loss, log_vars = parse_losses(losses)
 
     outputs = dict(
-        loss=loss, log_vars=log_vars, num_samples=len(data['img'].data))
+        loss=loss, log_vars=log_vars, num_samples=len(data['fact_img'].data))
 
     return outputs
 
@@ -262,7 +262,7 @@ def _non_dist_train(model,
             seed=cfg.seed) for ds in dataset
     ]
     # put model on gpus
-    model = MMDataParallel(model, device_ids=range(cfg.gpus)).cuda()
+    model = MMDataParallel(model, device_ids=range(cfg.gpus)).cuda().float()
 
     # build runner
     optimizer = build_optimizer(model, cfg.optimizer)

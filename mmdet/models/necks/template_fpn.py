@@ -13,11 +13,11 @@ class TemplateFPN(FPN):
                  num_outs,
                  merge_method='concat',
                  **kwargs):
-        super(TemplateFPN, self).__init__(in_channels, out_channels, num_outs,
-                                          **kwargs)
         self.merge_method = merge_method
         if self.merge_method == 'concat':
-            self.in_channels *= 2
+            in_channels = [2 * t for t in in_channels]
+        super(TemplateFPN, self).__init__(in_channels, out_channels, num_outs,
+                                          **kwargs)
 
     def merge_feats(self, template_feat, fact_feat):
         if self.merge_method == 'concat':

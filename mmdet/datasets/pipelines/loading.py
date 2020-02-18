@@ -16,17 +16,22 @@ class LoadImageFromFile(object):
 
     def __call__(self, results):
         if results['img_prefix'] is not None:
-            filename = osp.join(results['img_prefix'],
-                                results['img_info']['filename'])
+            template_img_name = osp.join(results['img_prefix'],results['img_info']['template_img'])
+            fact_img_name = osp.join(results['img_prefix'], results['img_info']['fact_img'])
         else:
-            filename = results['img_info']['filename']
-        img = mmcv.imread(filename, self.color_type)
+            template_img_name = results['img_info']['template_img']
+            fact_img_name = results['img_info']['fact_img']
+        template_img = mmcv.imread(template_img_name, self.color_type)
+        fact_img = mmcv.imread(fact_img_name, self.color_type)
         if self.to_float32:
-            img = img.astype(np.float32)
-        results['filename'] = filename
-        results['img'] = img
-        results['img_shape'] = img.shape
-        results['ori_shape'] = img.shape
+            template_img = template_img.astype(np.float32)
+            fact_img = fact_img.astype(np.float32)
+        results['template_img_name'] = template_img_name
+        results['template_img'] = template_img
+        results['fact_img_name'] = fact_img_name
+        results['fact_img'] = fact_img
+        results['img_shape'] = fact_img.shape
+        results['ori_shape'] = fact_img.shape
         return results
 
     def __repr__(self):

@@ -5,7 +5,7 @@ import os.path as osp
 import time
 
 import mmcv
-import torch
+import torch.nn.modules
 from mmcv import Config
 from mmcv.runner import init_dist
 
@@ -18,7 +18,7 @@ from mmdet.utils import get_root_logger
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
-    parser.add_argument('config', help='train config file path')
+    parser.add_argument('--config', help='train config file path', default='../template_detector_r50.py')
     parser.add_argument('--work_dir', help='the dir to save logs and models')
     parser.add_argument(
         '--resume_from', help='the checkpoint file to resume from')
