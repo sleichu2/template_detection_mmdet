@@ -29,7 +29,7 @@ def single_gpu_test(model, data_loader, show=False):
         if show:
             model.module.show_result(data, result)
 
-        batch_size = data['img'][0].size(0)
+        batch_size = data['fact_img'][0].size(0)
         for _ in range(batch_size):
             prog_bar.update()
     return results
@@ -200,8 +200,8 @@ class MultipleKVAction(argparse.Action):
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMDet test (and eval) a model')
-    parser.add_argument('config', help='test config file path')
-    parser.add_argument('checkpoint', help='checkpoint file')
+    parser.add_argument('--config', help='test config file path', default='../template_detector_r50.py')
+    parser.add_argument('--checkpoint', help='checkpoint file', default='../tools/workdir/epoch_11.pth')
     parser.add_argument('--out', help='output result file in pickle format')
     parser.add_argument(
         '--eval',
@@ -209,7 +209,7 @@ def parse_args():
         nargs='+',
         help='evaluation metrics, which depends on the dataset, e.g., "bbox",'
         ' "segm", "proposal" for COCO, and "mAP", "recall" for PASCAL VOC')
-    parser.add_argument('--show', action='store_true', help='show results')
+    parser.add_argument('--show', action='store_true', help='show results', default=True)
     parser.add_argument(
         '--gpu_collect',
         action='store_true',
@@ -271,13 +271,13 @@ def main():
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
         wrap_fp16_model(model)
-    checkpoint = load_checkpoint(model, args.checkpoint, map_location='cpu')
-    # old versions did not save class info in checkpoints, this walkaround is
-    # for backward compatibility
-    if 'CLASSES' in checkpoint['meta']:
-        model.CLASSES = checkpoint['meta']['CLASSES']
-    else:
-        model.CLASSES = dataset.CLASSES
+    # checkpoint = load_checkpoint(model, args.checkpoint, map_location='cpu')
+    # # old versions did not save class info in checkpoints, this walkaround is
+    # # for backward compatibility
+    # if 'CLASSES' in checkpoint['meta']:
+    #     model.CLASSES = checkpoint['meta']['CLASSES']
+    # else:
+    model.CLASSES = 2
 
     if not distributed:
         model = MMDataParallel(model, device_ids=[0])
