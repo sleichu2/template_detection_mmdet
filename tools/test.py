@@ -201,7 +201,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='MMDet test (and eval) a model')
     parser.add_argument('--config', help='test config file path', default='../template_detector_r50.py')
-    parser.add_argument('--checkpoint', help='checkpoint file', default='../tools/workdir/epoch_11.pth')
+    parser.add_argument('--checkpoint', help='checkpoint file', default='./workdir/latest.pth')
     parser.add_argument('--out', help='output result file in pickle format')
     parser.add_argument(
         '--eval',
@@ -271,13 +271,13 @@ def main():
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
         wrap_fp16_model(model)
-    # checkpoint = load_checkpoint(model, args.checkpoint, map_location='cpu')
-    # # old versions did not save class info in checkpoints, this walkaround is
-    # # for backward compatibility
-    # if 'CLASSES' in checkpoint['meta']:
-    #     model.CLASSES = checkpoint['meta']['CLASSES']
-    # else:
-    model.CLASSES = 2
+    checkpoint = load_checkpoint(model, args.checkpoint, map_location='cpu')
+    # old versions did not save class info in checkpoints, this walkaround is
+    # for backward compatibility
+    if 'CLASSES' in checkpoint['meta']:
+        model.CLASSES = checkpoint['meta']['CLASSES']
+    else:
+        model.CLASSES = 2
 
     if not distributed:
         model = MMDataParallel(model, device_ids=[0])

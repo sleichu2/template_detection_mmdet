@@ -13,10 +13,15 @@ def bbox2delta(proposals, gt, means=[0, 0, 0, 0], stds=[1, 1, 1, 1]):
     pw = proposals[..., 2] - proposals[..., 0] + 1.0
     ph = proposals[..., 3] - proposals[..., 1] + 1.0
 
-    gx = (gt[..., 0] + gt[..., 2]) * 0.5
-    gy = (gt[..., 1] + gt[..., 3]) * 0.5
-    gw = gt[..., 2] - gt[..., 0] + 1.0
-    gh = gt[..., 3] - gt[..., 1] + 1.0
+    # gx = (gt[..., 0] + gt[..., 2]) * 0.5
+    # gy = (gt[..., 1] + gt[..., 3]) * 0.5
+    # gw = gt[..., 2] - gt[..., 0] + 1.0
+    # gh = gt[..., 3] - gt[..., 1] + 1.0
+
+    gx = (2 * gt[..., 0] + gt[..., 2]) * 0.5
+    gy = (2 * gt[..., 1] + gt[..., 3]) * 0.5
+    gw = gt[..., 2]
+    gh = gt[..., 3]
 
     dx = (gx - px) / pw
     dy = (gy - py) / ph

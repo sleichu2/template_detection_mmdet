@@ -77,7 +77,7 @@ def batch_processor(model, data, train_mode):
 
     outputs = dict(
         loss=loss, log_vars=log_vars, num_samples=len(data['fact_img'].data))
-
+    print(loss)
     return outputs
 
 
