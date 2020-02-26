@@ -27,8 +27,7 @@ def single_gpu_test(model, data_loader, show=False):
         results.append(result)
 
         if show:
-            model.module.show_result(data, result)
-
+            model.module.show_result(data, result, outfile=str(i + 1) + '.jpg')
         batch_size = data['fact_img'][0].size(0)
         for _ in range(batch_size):
             prog_bar.update()
@@ -201,7 +200,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='MMDet test (and eval) a model')
     parser.add_argument('--config', help='test config file path', default='../template_detector_r50.py')
-    parser.add_argument('--checkpoint', help='checkpoint file', default='./workdir/latest.pth')
+    parser.add_argument('--checkpoint', help='checkpoint file', default='./workdir/epoch_64.pth')
     parser.add_argument('--out', help='output result file in pickle format')
     parser.add_argument(
         '--eval',

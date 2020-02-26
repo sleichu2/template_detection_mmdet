@@ -18,9 +18,9 @@ class TemplateDetector(SingleStageDetector):
     def extract_feat(self, template_img, fact_img):
         """Directly extract features from the the backbone+neck
         """
-        a = torch.sum(torch.isnan(template_img))
+        #a = torch.sum(torch.isnan(template_img))
         template_feat = self.backbone(template_img)
-        b = torch.sum(torch.isnan(template_feat[1]))
+        #b = torch.sum(torch.isnan(template_feat[1]))
         fact_feat = self.backbone(fact_img)
         assert self.with_neck
         x = self.neck(template_feat, fact_feat)
