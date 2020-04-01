@@ -27,6 +27,7 @@ class TemplateDetector(SingleStageDetector):
         return x
     def simple_test(self, template_img, fact_img, img_meta, rescale=False):
         x = self.extract_feat(template_img,fact_img)
+        img_meta[0]['scale_factor'] = img_meta[0]['scale_factor1']
         outs = self.bbox_head(x)
         bbox_inputs = outs + (img_meta, self.test_cfg, rescale)
         bbox_list = self.bbox_head.get_bboxes(*bbox_inputs)
@@ -45,6 +46,9 @@ class TemplateDetector(SingleStageDetector):
             img_meta (List[List[dict]]): the outer list indicates test-time
                 augs (multiscale, flip, etc.) and the inner list indicates
                 images in a batch
+                :param img_metas:
+                :param fact_img:
+                :param template_img:
         """
         for var, name in [(template_img, 'template_img'), (fact_img, 'fact_img'), (img_metas, 'img_metas')]:
             if not isinstance(var, list):
@@ -68,15 +72,22 @@ class TemplateDetector(SingleStageDetector):
                       template_img,
                       fact_img,
                       img_metas,
-                      gt_bboxes,
+                      gt_bboxes1,
+                      gt_bboxes2,
                       gt_labels,
                       gt_bboxes_ignore=None):
         x = self.extract_feat(template_img, fact_img)
         outs = self.bbox_head(x)
-        loss_inputs = outs + (gt_bboxes, gt_labels, img_metas, self.train_cfg)
-        losses = self.bbox_head.loss(
+        loss_inputs = outs + (gt_bboxes1, gt_labels, img_metas, self.train_cfg)
+        losses1 = self.bbox_head.loss(
             *loss_inputs, gt_bboxes_ignore=gt_bboxes_ignore)
-        return losses
+
+        outs = self.bbox_head(x)
+        loss_inputs = outs + (gt_bboxes2, gt_labels, img_metas, self.train_cfg)
+        losses2 = self.bbox_head.loss(
+            *loss_inputs, gt_bboxes_ignore=gt_bboxes_ignore)
+
+        return losses1, losses2
 
     def forward(self,
                 template_img,

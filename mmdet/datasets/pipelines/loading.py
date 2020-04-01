@@ -32,6 +32,8 @@ class LoadImageFromFile(object):
         results['fact_img'] = fact_img
         results['img_shape'] = fact_img.shape
         results['ori_shape'] = fact_img.shape
+        results['temp_img_shape'] = template_img.shape
+        results['temp_ori_shape'] = template_img.shape
         return results
 
     def __repr__(self):
@@ -56,13 +58,14 @@ class LoadAnnotations(object):
 
     def _load_bboxes(self, results):
         ann_info = results['ann_info']
-        results['gt_bboxes'] = ann_info['bboxes']
-
+        results['gt_bboxes1'] = ann_info['bboxes1']
+        results['gt_bboxes2'] = ann_info['bboxes2']
         gt_bboxes_ignore = ann_info.get('bboxes_ignore', None)
         if gt_bboxes_ignore is not None:
             results['gt_bboxes_ignore'] = gt_bboxes_ignore
             results['bbox_fields'].append('gt_bboxes_ignore')
-        results['bbox_fields'].append('gt_bboxes')
+        results['bbox_fields'].append('gt_bboxes1')
+        results['bbox_fields'].append('gt_bboxes2')
         return results
 
     def _load_labels(self, results):

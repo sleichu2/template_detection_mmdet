@@ -19,7 +19,7 @@ model = dict(
         num_outs=5),
     bbox_head=dict(
         type='RetinaHead',
-        num_classes=2,
+        num_classes=3,
         in_channels=256,
         stacked_convs=4,
         feat_channels=256,
@@ -66,7 +66,7 @@ train_pipeline = [
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['template_img', 'fact_img', 'gt_bboxes', 'gt_labels']),
+    dict(type='Collect', keys=['template_img', 'fact_img', 'gt_bboxes1', 'gt_bboxes2','gt_labels']),
 ]
 test_pipeline = [
     dict(type='LoadImageFromFile'),

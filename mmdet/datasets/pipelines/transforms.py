@@ -119,27 +119,35 @@ class Resize(object):
 
     def _resize_img(self, results):
         if self.keep_ratio:
-            fact_img, _ = mmcv.imrescale(results['fact_img'], results['scale'], return_scale=True)
-            template_img, scale_factor = mmcv.imrescale(results['template_img'], results['scale'], return_scale=True)
+            fact_img, scale_factor1 = mmcv.imrescale(results['fact_img'], results['scale'], return_scale=True)
+            template_img, scale_factor2 = mmcv.imrescale(results['template_img'], results['scale'], return_scale=True)
         else:
-            fact_img, _, _ = mmcv.imresize(results['fact_img'], results['scale'], return_scale=True)
+            fact_img, w_scale, h_scale = mmcv.imresize(results['fact_img'], results['scale'], return_scale=True)
+            scale_factor1 = np.array([w_scale, h_scale, w_scale, h_scale], dtype=np.float32)
             template_img, w_scale, h_scale = mmcv.imresize(results['template_img'], results['scale'], return_scale=True)
-            scale_factor = np.array([w_scale, h_scale, w_scale, h_scale],dtype=np.float32)
+            scale_factor2 = np.array([w_scale, h_scale, w_scale, h_scale],dtype=np.float32)
 
         results['fact_img'] = fact_img
         results['template_img'] = template_img
         results['img_shape'] = fact_img.shape
         results['pad_shape'] = fact_img.shape  # in case that there is no padding
-        results['scale_factor'] = scale_factor
+        results['scale_factor1'] = scale_factor1
+        results['scale_factor2'] = scale_factor2
         results['keep_ratio'] = self.keep_ratio
 
     def _resize_bboxes(self, results):
         img_shape = results['img_shape']
-        for key in results.get('bbox_fields', []):
-            bboxes = np.array(results[key]) * results['scale_factor']
+        if 'gt_bboxes1' in results.get('bbox_fields', []):
+            bboxes = np.array(results['gt_bboxes1']) * results['scale_factor1']
             bboxes[:, 0::2] = np.clip(bboxes[:, 0::2], 0, img_shape[1] - 1)
             bboxes[:, 1::2] = np.clip(bboxes[:, 1::2], 0, img_shape[0] - 1)
-            results[key] = bboxes
+            results['gt_bboxes1'] = bboxes
+        if 'gt_bboxes2' in results.get('bbox_fields', []):
+            bboxes = np.array(results['gt_bboxes2']) * results['scale_factor2']
+            bboxes[:, 0::2] = np.clip(bboxes[:, 0::2], 0, img_shape[1] - 1)
+            bboxes[:, 1::2] = np.clip(bboxes[:, 1::2], 0, img_shape[0] - 1)
+            results['gt_bboxes2'] = bboxes
+
 
     def _resize_masks(self, results):
         for key in results.get('mask_fields', []):

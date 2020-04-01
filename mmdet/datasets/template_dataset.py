@@ -46,8 +46,9 @@ class TemplateDataset(CustomDataset):
     def prepare_train_img(self, idx):
         img_info = self.img_infos[idx]
         ann_info = {}
-        ann_info['bboxes'] = img_info.pop('bboxes')
-        ann_info['labels'] = img_info.pop('labels')
+        ann_info['bboxes1'] = img_info.get('bboxes1')#fact
+        ann_info['bboxes2'] = img_info.get('bboxes2')#template
+        ann_info['labels'] = img_info.get('labels')
         results = dict(img_info=img_info, ann_info=ann_info)
         if self.proposals is not None:
             results['proposals'] = self.proposals[idx]

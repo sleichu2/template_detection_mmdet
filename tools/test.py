@@ -15,7 +15,6 @@ from mmdet.core import wrap_fp16_model
 from mmdet.datasets import build_dataloader, build_dataset
 from mmdet.models import build_detector
 
-
 def single_gpu_test(model, data_loader, show=False):
     model.eval()
     results = []
@@ -27,7 +26,11 @@ def single_gpu_test(model, data_loader, show=False):
         results.append(result)
 
         if show:
-            model.module.show_result(data, result, outfile=str(i + 1) + '.jpg')
+            shape = []
+            shape.append(data['img_meta'][0].data[0][0]['ori_shape'])
+            #shape.append(data['img_meta'][0].data[0][0]['temp_ori_shape'])
+            model.module.show_result(data, result[0], outfile='res/' + str(i) + 'f.jpg',score_thr=0.4,size=shape[0],mode=0)
+            #model.module.show_result_(data, result[1], outfile='res/' + str(i) + 't.jpg', score_thr=0.4, size=shape[1],mode=0)
         batch_size = data['fact_img'][0].size(0)
         for _ in range(batch_size):
             prog_bar.update()
@@ -199,8 +202,8 @@ class MultipleKVAction(argparse.Action):
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMDet test (and eval) a model')
-    parser.add_argument('--config', help='test config file path', default='../template_detector_r50.py')
-    parser.add_argument('--checkpoint', help='checkpoint file', default='./workdir/epoch_64.pth')
+    parser.add_argument('--config', help='test config file path', default='../siam_rpn_retina.py')
+    parser.add_argument('--checkpoint', help='checkpoint file', default='workdir/epoch_8.pth')
     parser.add_argument('--out', help='output result file in pickle format')
     parser.add_argument(
         '--eval',
